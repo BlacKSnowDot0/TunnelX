@@ -403,20 +403,20 @@ public partial class MainViewModel : INotifyPropertyChanged
         ? (_trafficRouter.LeakCount == 0
             ? (_trafficRouter.LeakBlockedCount == 0
                 ? "Leak: OK"
-                : $"Leak: OK (blocked {_trafficRouter.LeakBlockedCount})")
+                : $"Leak: Protected {_trafficRouter.LeakBlockedCount}")
             : $"Leak: {_trafficRouter.LeakCount}")
         : "Leak: -";
     public string HeaderLeakColor => !IsConnected
         ? "#6CCB5F"
         : _trafficRouter.LeakCount > 0
             ? "#E05252"
-            : (_trafficRouter.LeakBlockedCount > 0 ? "#E07820" : "#6CCB5F");
+            : "#6CCB5F";
 
     public string HealthLeakText => IsConnected
         ? (_trafficRouter.LeakCount == 0
             ? (_trafficRouter.LeakBlockedCount == 0
                 ? "0 leak"
-                : $"0 leak / {_trafficRouter.LeakBlockedCount} blocked")
+                : $"0 leak / {_trafficRouter.LeakBlockedCount} protected")
             : $"{_trafficRouter.LeakCount} leak")
         : "-";
     public string HealthDnsText => IsConnected

@@ -293,9 +293,11 @@ public partial class TrafficRouterService : IDisposable
     public long LeakCount => Interlocked.Read(ref _statLeakConfirmed);
     /// <summary>
     /// Number of attempted leaks blocked locally by leak-guard.
-    /// Diagnostic-only signal for policy-transition races.
+    /// Diagnostic-only signal; these packets did not escape the machine.
     /// </summary>
     public long LeakBlockedCount => Interlocked.Read(ref _statLeakBlocked);
+    public long LeakBlockedRecoveredCount => Interlocked.Read(ref _statLeakBlockedRecovered);
+    public long LeakBlockedSuppressedCount => Interlocked.Read(ref _statLeakBlockedSuppressed);
     public long Ipv6BlockedCount => Interlocked.Read(ref _statFlowIPv6Blocked);
     public long DnsRedirectCount => Interlocked.Read(ref _redirectCount);
     public long ActiveRouteCount => _addedRoutes.Count;
@@ -540,13 +542,13 @@ public partial class TrafficRouterService : IDisposable
         long netOutFail = Interlocked.Read(ref _statNetOutSendFailed);
         string mode = _fullRouteEnabled ? "full-route" : "split";
         string leakState = leakConfirmed > 0 ? "LEAK-DETECTED" :
-            (leakBlocked > 0 ? "BLOCKING-ATTEMPTS" : "OK");
+            (leakBlocked > 0 ? "PROTECTED" : "OK");
         Logger.Info(
             $"[STATS] mode={mode} health={leakState} " +
             $"flows={flowEst}/{flowDel} targetHit={flowHit} excluded={flowExcl} ipv6Drop={ipv6Blocked} " +
             $"routes={Interlocked.Read(ref _statRoutesAdded)}({Interlocked.Read(ref _statRoutesFailed)}fail)/{_addedRoutes.Count}active " +
             $"rewriteOut={netOutRw} rewriteIn={netInRw} rewriteFail={netOutFail} nat={_natTable.Count} " +
-            $"leakConfirmed={leakConfirmed} leakBlocked={leakBlocked} recovered={leakBlockedRecovered} suppressed={leakBlockedSuppressed} " +
+            $"leakConfirmed={leakConfirmed} protectedBlocked={leakBlocked} recovered={leakBlockedRecovered} suppressed={leakBlockedSuppressed} " +
             $"targets={_targetExecutables.Count} blockedApps={_blockedExecutables.Count}");
 
         // Loop health check — warn if any background loop has exited unexpectedly

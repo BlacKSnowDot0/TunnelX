@@ -235,11 +235,11 @@ public partial class TrafficRouterService
 
                         leakLogCount++;
                         if (recovered)
-                            Logger.Warning($"[LEAK-BLOCKED] Packet with VPN srcIP exiting PHYSICAL ifIdx={addrBuf.IfIdx} → dst={dst} (proto={buffer[9]}) — blocked locally, route restored for retransmit via VPN");
+                            Logger.Info($"[LEAK-PROTECTED] Packet with VPN srcIP exiting PHYSICAL ifIdx={addrBuf.IfIdx} → dst={dst} (proto={buffer[9]}) — blocked locally, route restored for retransmit via VPN");
                         else if (graceSuppressed)
-                            Logger.Info($"[LEAK-BLOCKED-TRANSITION] Packet with VPN srcIP exiting PHYSICAL ifIdx={addrBuf.IfIdx} → dst={dst} (proto={buffer[9]}) — blocked during policy transition grace");
+                            Logger.Info($"[LEAK-PROTECTED-TRANSITION] Packet with VPN srcIP exiting PHYSICAL ifIdx={addrBuf.IfIdx} → dst={dst} (proto={buffer[9]}) — blocked during policy transition grace");
                         else
-                            Logger.Warning($"[LEAK-BLOCKED] Packet with VPN srcIP exiting PHYSICAL ifIdx={addrBuf.IfIdx} → dst={dst} (proto={buffer[9]}) — blocked by split policy, route not restored");
+                            Logger.Info($"[LEAK-PROTECTED] Packet with VPN srcIP exiting PHYSICAL ifIdx={addrBuf.IfIdx} → dst={dst} (proto={buffer[9]}) — blocked by split policy, route not restored");
                     }
                 }
             }
