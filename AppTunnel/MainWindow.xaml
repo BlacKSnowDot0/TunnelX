@@ -718,17 +718,31 @@
                             Padding="10,5"
                             FontSize="10"
                             ToolTip="راهنما و عیب‌یابی"/>
-                    <TextBlock Text="ساخته شده توسط Maxi" 
+                    <TextBlock Grid.Column="1"
+                               Text="TunnelX نرم‌افزاری آزاد و رایگان برای مدیریت تونل و Split Tunneling است؛ ساخته شده توسط MaxFan."
                                Foreground="{StaticResource TextSecondaryBrush}"
-                               FontSize="10" Grid.Column="1"
-                               HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Left" FlowDirection="LeftToRight">
-                        <TextBlock Text="TunnelX" Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="10" VerticalAlignment="Center"/>
-                        <TextBlock Text=" • " Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="10" VerticalAlignment="Center"/>
-                        <TextBlock Text="{Binding AppVersion}" Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontSize="10" VerticalAlignment="Center"/>
+                               FontSize="10"
+                               TextWrapping="Wrap"
+                               TextTrimming="CharacterEllipsis"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               Margin="12,0"/>
+                    <StackPanel Grid.Column="2"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                FlowDirection="LeftToRight">
+                        <TextBlock Text="{Binding AppVersion}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontSize="10"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"/>
+                        <Button Content="GitHub پروژه"
+                                Command="{Binding OpenGitHubCommand}"
+                                Style="{StaticResource SecondaryButton}"
+                                Padding="10,5"
+                                FontSize="10"
+                                ToolTip="باز کردن صفحه GitHub پروژه TunnelX"/>
                     </StackPanel>
                 </Grid>
             </Border>
