@@ -99,7 +99,9 @@ public partial class TrafficRouterService
                         }
 
                         isBlockedProc = !_fullRouteEnabled && IsExecutableBlocked(packetProc);
-                        if (!shouldRoute && !isBlockedProc && IsExecutableTargeted(packetProc))
+                        if (!shouldRoute && !isBlockedProc &&
+                            !string.IsNullOrWhiteSpace(packetProc) &&
+                            IsExecutableTargeted(packetProc))
                         {
                             shouldRoute = true;
                             _ipToProcess[dstNbo] = packetProc;
@@ -202,7 +204,7 @@ public partial class TrafficRouterService
                             dnsProc = connCache.GetProcessName(tuple2);
                         }
 
-                        if (IsExecutableTargeted(dnsProc))
+                        if (!string.IsNullOrWhiteSpace(dnsProc) && IsExecutableTargeted(dnsProc))
                         {
                             uint publicDnsNbo = _dnsRedirectIpNbo;
 
@@ -275,7 +277,7 @@ public partial class TrafficRouterService
                             }
 
                             // Check if source app is in target tunnel apps
-                            if (IsExecutableTargeted(procName))
+                            if (!string.IsNullOrWhiteSpace(procName) && IsExecutableTargeted(procName))
                             {
                                 shouldRoute = true;
                             }

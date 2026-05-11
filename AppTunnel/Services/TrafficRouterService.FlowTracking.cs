@@ -121,7 +121,7 @@ public partial class TrafficRouterService
         for (int hop = 0; hop < 8 && current > 4; hop++)
         {
             var name = GetProcessNameByPid(current);
-            if (IsExecutableTargeted(name))
+            if (!string.IsNullOrWhiteSpace(name) && IsExecutableTargeted(name))
             {
                 _pidTargetOwnerCache[pid] = name;
                 return name;

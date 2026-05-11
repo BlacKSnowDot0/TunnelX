@@ -75,7 +75,7 @@ public partial class TrafficRouterService
                 if (TryParseConnectionTuple(buffer, readLen, out var tuple))
                 {
                     var processName = connectionCache.GetProcessName(tuple);
-                    if (IsExecutableTargeted(processName))
+                    if (!string.IsNullOrWhiteSpace(processName) && IsExecutableTargeted(processName))
                     {
                         shouldRedirect = true;
                         matchedProcess = processName;
