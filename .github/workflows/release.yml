@@ -139,17 +139,18 @@ jobs:
           }
 
           $body = gh release view $tag --json body --jq .body
-          $provenance = @"
-<!-- release-provenance:start -->
-## Build provenance
-
-- Built and uploaded by GitHub Actions.
-- Workflow: ``release``
-- Run: $runUrl
-- Commit: ``${{ github.sha }}``
-- SHA256: ``$sha256  $artifactName``
-<!-- release-provenance:end -->
-"@
+          $provenanceLines = @(
+            "<!-- release-provenance:start -->",
+            "## Build provenance",
+            "",
+            "- Built and uploaded by GitHub Actions.",
+            "- Workflow: ``release``",
+            "- Run: $runUrl",
+            "- Commit: ``${{ github.sha }}``",
+            "- SHA256: ``$sha256  $artifactName``",
+            "<!-- release-provenance:end -->"
+          )
+          $provenance = $provenanceLines -join "`n"
 
           if ($body -match '(?s)<!-- release-provenance:start -->.*<!-- release-provenance:end -->') {
             $body = $body -replace '(?s)<!-- release-provenance:start -->.*<!-- release-provenance:end -->', $provenance
