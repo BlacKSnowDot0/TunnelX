@@ -1,0 +1,125 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish, for example v1.2.23"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Publish Windows release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Resolve release metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $tag = "${{ inputs.tag }}"
+          }
+
+          if ($tag -notmatch '^v\d+\.\d+\.\d+$') {
+            throw "Release tag must use vMAJOR.MINOR.PATCH format. Received: $tag"
+          }
+
+          [xml]$project = Get-Content "AppTunnel/AppTunnel.csproj"
+          $projectVersion = $project.Project.PropertyGroup.Version
+          $tagVersion = $tag.TrimStart("v")
+
+          if ($projectVersion -ne $tagVersion) {
+            throw "Tag version ($tagVersion) does not match AppTunnel.csproj Version ($projectVersion)."
+          }
+
+          $artifactName = "TunnelX-$tag-standalone-compressed.exe"
+
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "version=$tagVersion" >> $env:GITHUB_OUTPUT
+          "artifact_name=$artifactName" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore AppTunnel.sln
+
+      - name: Build
+        run: dotnet build AppTunnel.sln -c Release --no-restore
+
+      - name: Publish standalone executable
+        run: >
+          dotnet publish AppTunnel\AppTunnel.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+          -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          -o publish\TunnelX
+
+      - name: Package release asset
+        id: package
+        shell: pwsh
+        run: |
+          $source = "publish/TunnelX/TunnelX.exe"
+          $asset = "publish/${{ steps.meta.outputs.artifact_name }}"
+          $checksum = "$asset.sha256"
+
+          if (-not (Test-Path $source)) {
+            throw "Published executable was not found at $source"
+          }
+
+          Move-Item -LiteralPath $source -Destination $asset
+          $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $asset).Hash.ToLowerInvariant()
+          "$hash  ${{ steps.meta.outputs.artifact_name }}" | Set-Content -Encoding ASCII -LiteralPath $checksum
+
+          "asset=$asset" >> $env:GITHUB_OUTPUT
+          "checksum=$checksum" >> $env:GITHUB_OUTPUT
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TunnelX-${{ steps.meta.outputs.tag }}-win-x64
+          path: |
+            ${{ steps.package.outputs.asset }}
+            ${{ steps.package.outputs.checksum }}
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $tag = "${{ steps.meta.outputs.tag }}"
+
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            git fetch --tags origin
+            if (-not (git tag --list $tag)) {
+              git tag $tag
+              git push origin $tag
+            }
+          }
+
+          gh release create $tag `
+            "${{ steps.package.outputs.asset }}" `
+            "${{ steps.package.outputs.checksum }}" `
+            --title "TunnelX $tag" `
+            --generate-notes `
+            --latest

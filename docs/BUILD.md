@@ -24,6 +24,27 @@ Rename the final executable with the app version:
 TunnelX-v1.2.23-standalone-compressed.exe
 ```
 
+## GitHub Actions Release
+
+Public releases are published by `.github/workflows/release.yml`.
+
+The release workflow:
+
+- runs on `windows-latest` with .NET 8;
+- accepts tags in `vMAJOR.MINOR.PATCH` format, such as `v1.2.23`;
+- verifies that the tag version matches `<Version>` in `AppTunnel/AppTunnel.csproj`;
+- builds and publishes the `win-x64` self-contained single-file executable;
+- attaches `TunnelX-vX.Y.Z-standalone-compressed.exe` and a `.sha256` checksum to the GitHub Release.
+
+To publish a release from the command line:
+
+```powershell
+git tag v1.2.23
+git push origin v1.2.23
+```
+
+The same workflow can also be run manually from GitHub Actions by providing the release tag.
+
 ## 32-bit Windows
 
 32-bit Windows builds are not supported at this time. Supporting `win-x86` would require a separate compatibility pass, x86-compatible native binaries for every bundled network component, and separate testing for WinDivert/Wintun, Xray/sing-box, packet interception, route management, and the standalone extraction path.
