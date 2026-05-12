@@ -89,7 +89,8 @@ jobs:
           $tag = "v$version"
 
           git fetch --tags origin
-          if (git rev-parse -q --verify "refs/tags/$tag") {
+          $existingTag = git tag --list $tag
+          if ($existingTag) {
             throw "Tag $tag already exists."
           }
 
