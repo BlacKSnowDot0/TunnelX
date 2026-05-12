@@ -37,6 +37,8 @@
 
 <span dir="ltr">[دانلود آخرین نسخه از GitHub Releases](https://github.com/MaxiFan/TunnelX/releases/latest)</span>
 
+فایل‌های منتشرشده توسط <span dir="ltr">GitHub Actions</span> ساخته و آپلود می‌شوند. برای هر فایل اجرایی <span dir="ltr">standalone</span>، فایل checksum با پسوند <span dir="ltr">`.sha256`</span> هم منتشر می‌شود و در متن هر <span dir="ltr">Release</span> لینک اجرای workflow قرار می‌گیرد.
+
 نسخه پیشنهادی برای کاربران، فایل <span dir="ltr">standalone</span> و <span dir="ltr">self-contained</span> است. این نسخه به نصب جداگانه <span dir="ltr">.NET Runtime</span> نیاز ندارد.
 
 ## نیازمندی‌های اجرا

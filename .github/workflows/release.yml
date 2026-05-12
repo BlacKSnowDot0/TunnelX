@@ -92,6 +92,7 @@ jobs:
 
           "asset=$asset" >> $env:GITHUB_OUTPUT
           "checksum=$checksum" >> $env:GITHUB_OUTPUT
+          "sha256=$hash" >> $env:GITHUB_OUTPUT
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v6
@@ -111,6 +112,9 @@ jobs:
           $asset = "${{ steps.package.outputs.asset }}"
           $checksum = "${{ steps.package.outputs.checksum }}"
           $title = "TunnelX $tag"
+          $runUrl = "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          $sha256 = "${{ steps.package.outputs.sha256 }}".ToUpperInvariant()
+          $artifactName = "${{ steps.meta.outputs.artifact_name }}"
 
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             git fetch --tags origin
@@ -133,3 +137,27 @@ jobs:
               --generate-notes `
               --latest
           }
+
+          $body = gh release view $tag --json body --jq .body
+          $provenance = @"
+<!-- release-provenance:start -->
+## Build provenance
+
+- Built and uploaded by GitHub Actions.
+- Workflow: ``release``
+- Run: $runUrl
+- Commit: ``${{ github.sha }}``
+- SHA256: ``$sha256  $artifactName``
+<!-- release-provenance:end -->
+"@
+
+          if ($body -match '(?s)<!-- release-provenance:start -->.*<!-- release-provenance:end -->') {
+            $body = $body -replace '(?s)<!-- release-provenance:start -->.*<!-- release-provenance:end -->', $provenance
+          }
+          else {
+            $body = "$body`n`n$provenance"
+          }
+
+          $notesFile = Join-Path $env:RUNNER_TEMP "release-notes.md"
+          $body | Set-Content -Encoding UTF8 -LiteralPath $notesFile
+          gh release edit $tag --notes-file $notesFile

@@ -31,6 +31,8 @@ Public downloads should be attached to GitHub Releases after release validation 
 
 [GitHub project](https://github.com/MaxiFan/TunnelX)
 
+Release assets are built and uploaded by GitHub Actions. Each published standalone executable includes a `.sha256` checksum file, and the release notes link back to the workflow run that produced the artifact.
+
 ## Build
 
 End-user requirements for the recommended standalone release:
