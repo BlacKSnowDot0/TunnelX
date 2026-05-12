@@ -108,6 +108,9 @@ jobs:
         shell: pwsh
         run: |
           $tag = "${{ steps.meta.outputs.tag }}"
+          $asset = "${{ steps.package.outputs.asset }}"
+          $checksum = "${{ steps.package.outputs.checksum }}"
+          $title = "TunnelX $tag"
 
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             git fetch --tags origin
@@ -117,9 +120,16 @@ jobs:
             }
           }
 
-          gh release create $tag `
-            "${{ steps.package.outputs.asset }}" `
-            "${{ steps.package.outputs.checksum }}" `
-            --title "TunnelX $tag" `
-            --generate-notes `
-            --latest
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $asset $checksum --clobber
+            gh release edit $tag --title $title --latest
+          }
+          else {
+            gh release create $tag `
+              $asset `
+              $checksum `
+              --title $title `
+              --generate-notes `
+              --latest
+          }
